@@ -2,17 +2,17 @@ spring:
     application:
         name: config-server
     profiles:
-        active: native
+        active: native # does not use Git but loads the config files from the local classpath
     
     cloud:
         config:
             server:
                 native:
-                    search-locations: classpath:/configurations/ # path where configurations will be stored
-#                 # git:
-#                 #     uri: ${GIT_URI}
-#                 #     username: ${GIT_USERNAME}
-#                 #     password: ${GIT_PASSWORD}
+                    search-locations: classpath:/configurations/ # path where configurations will be stored (like this ./configurations/<name-service>.yml)
+                # git: # not use Git but loads the config files from the local classpath
+                #     uri: ${GIT_URI}
+                #     username: ${GIT_USERNAME}
+                #     password: ${GIT_PASSWORD}
 
 server:
     port: ${CONFIG_SERVER_PORT:8888}
