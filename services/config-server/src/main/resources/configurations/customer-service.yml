@@ -1,0 +1,13 @@
+spring:
+    data:
+        mongodb: # mongo configuration
+            username: ${CUST_MONGODB_USERNAME:root}
+            password: ${CUST_MONGODB_PASSWORD:root}
+            host: ${CUST_MONGODB_HOST:localhost}
+            port: ${CUST_MONGODB_PORT:27017}
+            database: ${CUST_MONGODB_DB:customer_db}
+            authentication-database: ${CUST_MONGODB_AUTH_DB:admin}
+             
+server: 
+    port: ${ORDER_SERVICE_PORT:8090}
+
