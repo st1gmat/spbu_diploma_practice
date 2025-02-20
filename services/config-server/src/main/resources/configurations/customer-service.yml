@@ -9,5 +9,5 @@ spring:
             authentication-database: ${CUST_MONGODB_AUTH_DB:admin}
              
 server: 
-    port: ${ORDER_SERVICE_PORT:8090}
+    port: ${CUST_SERVICE_PORT:8090}
 
