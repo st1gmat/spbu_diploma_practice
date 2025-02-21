@@ -29,16 +29,12 @@ public class ProductController {
     private final ProductService service;
 
     @PostMapping
-    public ResponseEntity<Integer> createProduct(
-            @RequestBody @Valid ProductRequest request
-    ) {
+    public ResponseEntity<Integer> createProduct( @RequestBody @Valid ProductRequest request) {
         return ResponseEntity.ok(service.createProduct(request));
     }
 
     @PostMapping("/buy")
-    public ResponseEntity<List<ProductBuyResponse>> BuyProducts(
-            @RequestBody List<ProductBuyRequest> request
-    ) {
+    public ResponseEntity<List<ProductBuyResponse>> BuyProducts( @RequestBody List<ProductBuyRequest> request) {
         return ResponseEntity.ok(service.buyProducts(request));
     }
     

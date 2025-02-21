@@ -2,7 +2,7 @@ package com.diploma.product_service.models;
 
 import java.math.BigDecimal;
 
-public record ProductPurchaseResponse(
+public record ProductBuyResponse(
         Integer productId,
         String name,
         String description,
