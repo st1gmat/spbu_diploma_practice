@@ -3,7 +3,7 @@ spring:
     # url: jdbc:postgresql://${PRODUCT_PG_HOST:localhost}:${PRODUCT_PG_PORT:5432}/${PRODUCT_PG_DATABASE:postgres}
     # username: ${PRODUCT_PG_USERNAME:root}
     # password: ${PRODUCT_PG_PASSWORD:root}
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5432/order
     # username: ${PRODUCT_PG_USERNAME:root}
     # password: ${PRODUCT_PG_PASSWORD:root}
     username: root
