@@ -2,17 +2,56 @@ package com.diploma.order_service.services;
 
 import org.springframework.stereotype.Service;
 
+import com.diploma.order_service.exceptions.BusinessException;
+import com.diploma.order_service.models.order.OrderLineRequest;
 import com.diploma.order_service.models.order.OrderRequest;
+import com.diploma.order_service.models.product.BuyRequest;
+import com.diploma.order_service.repository.OrderRepository;
+import com.diploma.order_service.requests.CustomerClient;
+import com.diploma.order_service.requests.ProductClient;
 
+import feign.FeignException.NotFound;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
+    private final CustomerClient customerClient;
+    private final ProductClient productClient;
+    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
+    private final OrderLineService orderLineService;
     
-    public Object createOrder(OrderRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createOrder'");
+    public Integer createOrder(OrderRequest request) {
+        // DevNotes: ****************************
+        // проверить покупателя (существует ли?)
+        // оформить товар, т.е. order-service -> product-service 
+        // сохранить заказ в бд
+        // сохранить строки в заказе
+        // реализовать процесс оплаты 
+        // + возможно, добавить подтверждение заказа (notification-service), если это уместно будет
+        // ****************************
+
+        // check customer
+        var customer = customerClient.findById(request.customerId()).orElseThrow(() -> new BusinessException("order creation failed: there is no customer with ID: " + request.customerId()));
+        
+        // buy the products
+        productClient.buyProducts(request.products());
+
+        //save order to db
+        var order = orderRepository.save(orderMapper.toOrder(request));
+
+        // save order lines to db
+        for(BuyRequest buyRequest : request.products()) {
+            orderLineService.saveOrderLine(
+                new OrderLineRequest(null, order.getId(), buyRequest.productId(), buyRequest.requestedQuantity())
+            );
+
+        }
+
+        // TODO: payment-service to implement pseudo payment process 
+
     }
 
 
