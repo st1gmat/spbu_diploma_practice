@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.diploma.order_service.models.order.Order;
 import com.diploma.order_service.models.order.OrderRequest;
+import com.diploma.order_service.models.order.OrderResponse;
 
 @Service
 public class OrderMapper {
@@ -15,5 +16,9 @@ public class OrderMapper {
         .paymentMethod(request.paymentMethod())
         .customerId(request.customerId())
         .build();
+    }
+
+    public OrderResponse fromOrder(Order order) {
+        return new OrderResponse(order.getId(), order.getReference(), order.getTotalAmount(), order.getPaymentMethod(), order.getCustomerId());
     }
 }
