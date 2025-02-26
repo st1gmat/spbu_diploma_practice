@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.diploma.order_service.models.order.Order;
 import com.diploma.order_service.models.order.OrderLine;
 import com.diploma.order_service.models.order.OrderLineRequest;
+import com.diploma.order_service.models.order.OrderLineResponse;
 
 @Service
 public class OrderLineMapper {
@@ -19,6 +20,9 @@ public class OrderLineMapper {
             )
             .productId(request.productId())
             .build();
+    }
+    public OrderLineResponse toOrderLineResponse(OrderLine request) {
+        return new OrderLineResponse(request.getId(), request.getQuantity());
     }
 
 }
