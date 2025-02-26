@@ -3,12 +3,3 @@ spring:
         import: optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:${CONFIG_SERVER_PORT:8888}
     application:
         name: order-service
-
-
-
-# URLs for open feign via api gateway
-application:
-    config:
-        customer-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/customer
-        product-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/product
-        payment-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/payment

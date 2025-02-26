@@ -18,6 +18,21 @@ spring:
     properties:
       hibernate:
           dialect: org.hibernate.dialect.PostgreSQLDialect
+    
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: orderConfirmation:com.diploma.order_service.models.order.OrderConfirmation
 
+
+# URLs for open feign via api gateway
+application:
+    config:
+        customer-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/customer
+        product-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/product
+        payment-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/payment
 server:
   port: ${ORDER_SERVICE_PORT:8633} 
