@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    # url: jdbc:postgresql://${PAYMENT_PG_HOST:localhost}:${PAYMENT_PG_PORT:5432}/${PAYMENT_PG_DATABASE:postgres}
+    # username: ${PAYMENT_PG_USERNAME:root}
+    # password: ${PAYMENT_PG_PASSWORD:root}
+    url: jdbc:postgresql://localhost:5432/payment
+    # username: ${PAYMENT_PG_USERNAME:root}
+    # password: ${PAYMENT_PG_PASSWORD:root}
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    # database: postgresql
+    # database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: paymentConfirmation:com.diploma.payment_service.models.PaymentNotificationRequest
+
+server:
+  port: ${PAYMENT_SERVICE_PORT:9324}
