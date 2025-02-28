@@ -10,9 +10,11 @@ import com.diploma.order_service.models.order.OrderConfirmation;
 import com.diploma.order_service.models.order.OrderLineRequest;
 import com.diploma.order_service.models.order.OrderRequest;
 import com.diploma.order_service.models.order.OrderResponse;
+import com.diploma.order_service.models.payment.PaymentRequest;
 import com.diploma.order_service.models.product.BuyRequest;
 import com.diploma.order_service.repository.OrderRepository;
 import com.diploma.order_service.requests.CustomerClient;
+import com.diploma.order_service.requests.PaymentClient;
 import com.diploma.order_service.requests.ProductClient;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -28,6 +30,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderLineService orderLineService;
     private final OrderProducer orderProducer;
+    private final PaymentClient paymentClient;
 
     public Integer createOrder(OrderRequest request) {
         // DevNotes: ****************************
@@ -56,14 +59,16 @@ public class OrderService {
                     new OrderLineRequest(null, order.getId(), buyRequest.productId(), buyRequest.requestedQuantity()));
 
         }
-        // TODO: create producers & consumers for order-service
-        // TODO: payment-service to implement pseudo payment process via kafka
 
+        // sending request to payment service
+        paymentClient.requestOrderPayment(new PaymentRequest(request.requestedAmount(), request.paymentMethod(),
+                order.getId(), order.getReference(), customer));
+        
+        // sending message to kafka to confirm order
         orderProducer.sendOrderConfirmation(
                 new OrderConfirmation(request.reference(), request.requestedAmount(), request.paymentMethod(), customer,
                         buyProducts));
 
-        
         return order.getId();
     }
 
