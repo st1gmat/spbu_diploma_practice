@@ -24,6 +24,7 @@ public class NotificationConsumer {
     // 3) реализовать псевдоотправку email
     // *********************
     private final NotificationRepository repository;
+    private final EmailService emailService;
 
     @KafkaListener(topics = "payment-topic")
     public void consumePaymentSuccessNotification(PaymentConfirmation paymentConfirmation) {
@@ -36,8 +37,13 @@ public class NotificationConsumer {
             .build()
         );
 
-        // todo: pseudoemail processing
-
+        var customerName = paymentConfirmation.customerFirstName() + " " + paymentConfirmation.customerLastName();
+        emailService.sendPaymentSuccessEmail(
+                paymentConfirmation.email(),
+                customerName,
+                paymentConfirmation.quantity(),
+                paymentConfirmation.orderRef()
+        );
     }
 
     @KafkaListener(topics = "order-topic")
@@ -51,7 +57,14 @@ public class NotificationConsumer {
             .build()
         );
 
-        // todo: pseudoemail processing
+        var customerName = orderConfirmation.customer().firstName() + " " + orderConfirmation.customer().lastName();
+        emailService.sendOrderConfirmationEmail(
+                orderConfirmation.customer().email(),
+                customerName,
+                orderConfirmation.quantity(),
+                orderConfirmation.orderReference(),
+                orderConfirmation.products()
+        );
     }
 
 }
