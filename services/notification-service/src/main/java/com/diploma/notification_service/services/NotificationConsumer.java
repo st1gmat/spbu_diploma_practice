@@ -1,8 +1,13 @@
 package com.diploma.notification_service.services;
 
+import java.time.LocalDateTime;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import com.diploma.notification_service.models.Notification;
+import com.diploma.notification_service.models.NotificationType;
+import com.diploma.notification_service.models.OrderConfirmation;
 import com.diploma.notification_service.models.PaymentConfirmation;
 import com.diploma.notification_service.repository.NotificationRepository;
 
@@ -22,16 +27,31 @@ public class NotificationConsumer {
 
     @KafkaListener(topics = "payment-topic")
     public void consumePaymentSuccessNotification(PaymentConfirmation paymentConfirmation) {
-        // todo: implement class
-        return;
+        log.info("NotificationConsumer:: consumePaymentSuccessNotification:: consuming message from payment-topic:: " + paymentConfirmation);
+        repository.save(
+            Notification.builder()
+                .notificationType(NotificationType.PAYMENT_CONFIRMATION)
+                .notificationDate(LocalDateTime.now())
+                .paymentConfirmation(paymentConfirmation)
+            .build()
+        );
+
+        // todo: pseudoemail processing
 
     }
 
     @KafkaListener(topics = "order-topic")
-    public void consumeOrderSuccessNotification(PaymentConfirmation paymentConfirmation) {
-        // todo: implement class
-        return;
+    public void consumeOrderSuccessNotification(OrderConfirmation orderConfirmation) {
+        log.info("NotificationConsumer:: consumeOrderSuccessNotification:: consuming message from order-topic:: " + orderConfirmation);
+        repository.save(
+            Notification.builder()
+                .notificationType(NotificationType.ORDER_CONFIRMATION)
+                .notificationDate(LocalDateTime.now())
+                .orderConfirmation(orderConfirmation)
+            .build()
+        );
 
+        // todo: pseudoemail processing
     }
 
 }
