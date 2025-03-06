@@ -5,7 +5,7 @@ spring:
         password: ${NOTIF_MONGODB_PASSWORD:root}
         host: ${NOTIF_MONGODB_HOST:localhost}
         port: ${NOTIF_MONGODB_PORT:27017}
-        database: ${NOTIF_MONGODB_DB:customer_db}
+        database: ${NOTIF_MONGODB_DB:notification_db}
         authentication-database: ${NOTIF_MONGODB_AUTH_DB:admin}
   kafka:
     consumer:
