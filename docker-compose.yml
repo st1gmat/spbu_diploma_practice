@@ -43,6 +43,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-root}
 
+  # i prefer to use vscode extension
   # mongo-express:
   #   image: mongo-express
   #   container_name: mongo_express
@@ -102,6 +103,17 @@ services:
   #   networks:
   #     - microservices-net
   #   restart: unless-stopped
+  
+  # Distributed log tracing
+  zipkin:
+      image: openzipkin/zipkin
+      container_name: zipkin
+      ports:
+        - "9411:9411"
+      networks:
+        - microservices-net
+      restart: unless-stopped
+
 
 networks:
   microservices-net:
