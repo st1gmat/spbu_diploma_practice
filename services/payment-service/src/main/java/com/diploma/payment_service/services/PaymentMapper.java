@@ -1,5 +1,7 @@
 package com.diploma.payment_service.services;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 import com.diploma.payment_service.models.Payment;
@@ -17,6 +19,7 @@ public class PaymentMapper {
             .id(request.id())
             .amount(request.amount())
             .paymentMethod(request.paymentMethod())
+            .createdDate(LocalDateTime.now())
             .build();
     }
 
