@@ -31,8 +31,8 @@ spring:
 # URLs for open feign via api gateway
 application:
     config:
-        customer-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/customer
-        product-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/product
-        payment-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:2424}/api/v1/payment
+        customer-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:8222}/api/v1/customer
+        product-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:8222}/api/v1/product
+        payment-url: http://${API_GATEWAY_HOST:localhost}:${API_GATEWAY_PORT:8222}/api/v1/payment
 server:
   port: ${ORDER_SERVICE_PORT:8633} 
