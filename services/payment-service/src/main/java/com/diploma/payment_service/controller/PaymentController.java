@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 
 
 @RestController
@@ -20,6 +21,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class PaymentController {
 
     private final PaymentService paymentService;
+
+    @GetMapping
+    public String test() {
+        return new String("Server is working");
+    }
+    
 
     @PostMapping
     public ResponseEntity<Integer> createPayment(@RequestBody @Valid PaymentRequest payment) {
