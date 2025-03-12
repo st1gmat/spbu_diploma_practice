@@ -1,12 +1,12 @@
 spring:
   r2dbc:
-    url: r2dbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/product
+    url: r2dbc:postgresql://${PRODUCT_PG_HOST:localhost}:${PRODUCT_PG_PORT:5432}/${PRODUCT_PG_DATABASE:product}
     username: ${PRODUCT_PG_USERNAME:root}
     password: ${PRODUCT_PG_PASSWORD:root}
-
-  sql:
-    init:
-      mode: always
-
+  flyway:
+    url: jdbc:postgresql://${PRODUCT_PG_HOST:localhost}:${PRODUCT_PG_PORT:5432}/${PRODUCT_PG_DATABASE:product}
+    user: ${PRODUCT_PG_USERNAME:root}
+    password: ${PRODUCT_PG_PASSWORD:root}
+    locations: classpath:db/postgres/migration
 server:
   port: ${PRODUCT_SERVICE_PORT:8345}
