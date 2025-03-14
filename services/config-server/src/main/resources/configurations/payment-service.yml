@@ -1,0 +1,20 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://${PAYMENT_PG_HOST:localhost}:${PAYMENT_PG_PORT:5432}/${PAYMENT_PG_DATABASE:product}
+    username: ${PAYMENT_PG_USERNAME:root}
+    password: ${PAYMENT_PG_PASSWORD:root}
+  flyway:
+    url: jdbc:postgresql://${PAYMENT_PG_HOST:localhost}:${PAYMENT_PG_PORT:5432}/${PAYMENT_PG_DATABASE:product}
+    user: ${PAYMENT_PG_USERNAME:root}
+    password: ${PAYMENT_PG_PASSWORD:root}
+    locations: classpath:db/postgres/migration
+kafka:
+  producer:
+    bootstrap-servers: localhost:9092
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    properties:
+      spring.json.type.mapping: paymentConfirmation:com.diploma.payment_service.models.PaymentNotificationRequest
+
+server:
+  port: ${PAYMENT_SERVICE_PORT:9324}
