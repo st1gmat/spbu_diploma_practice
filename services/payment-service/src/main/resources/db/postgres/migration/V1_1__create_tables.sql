@@ -1,10 +1,3 @@
-CREATE TABLE IF NOT EXISTS customer (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE
-);
-
 CREATE TABLE IF NOT EXISTS payment (
     id SERIAL PRIMARY KEY,
     amount DECIMAL(38,2) NOT NULL,
