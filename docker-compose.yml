@@ -32,5 +32,4 @@ networks:
 
 volumes:
   postgres:
-  # pgadmin:
   mongo:
