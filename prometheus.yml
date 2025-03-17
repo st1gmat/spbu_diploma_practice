@@ -1,11 +1,16 @@
 global:
-  scrape_interval: 15s  # Интервал сбора метрик
+  scrape_interval: 15s # Интервал сбора метрик
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
+
+  - job_name: 'jmeter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.0.107:9270']
 
   # - job_name: 'microservices'
   #   metrics_path: '/actuator/prometheus'
@@ -19,18 +24,18 @@ scrape_configs:
   #         - 'localhost:9324'
   #         - 'localhost:8345'
 
-  - job_name: 'microservices'
-    metrics_path: '/actuator/prometheus'
+  - job_name: "microservices"
+    metrics_path: "/actuator/prometheus"
     scrape_interval: 5s
     static_configs:
       - targets:
-          - '172.21.218.219:8222'  # API Gateway
-          - '172.21.218.219:8090'  # Customer Service
-          - '172.21.218.219:8257'  # Notification Service
-          - '172.21.218.219:8633'  # Order Service
-          - '172.21.218.219:9324'  # Payment Service
-          - '172.21.218.219:8345'  # Product Service
+          - "172.21.218.219:8222" # API Gateway
+          - "172.21.218.219:8090" # Customer Service
+          - "172.21.218.219:8257" # Notification Service
+          - "172.21.218.219:8633" # Order Service
+          - "172.21.218.219:9324" # Payment Service
+          - "172.21.218.219:8345" # Product Service
 
-  - job_name: 'kafka'
+  - job_name: "kafka"
     static_configs:
-      - targets: ['localhost:9092']
+      - targets: ["localhost:9092"]
