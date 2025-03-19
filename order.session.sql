@@ -1,0 +1,4 @@
+ALTER SEQUENCE order_line_id_seq RESTART WITH 1;
+ALTER SEQUENCE customer_order_id_seq RESTART WITH 1;
+TRUNCATE TABLE order_line CASCADE;
+TRUNCATE TABLE customer_order CASCADE;

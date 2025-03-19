@@ -1,0 +1,2 @@
+ALTER SEQUENCE payment_seq RESTART WITH 1;
+TRUNCATE TABLE payment;
