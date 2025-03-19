@@ -8,7 +8,7 @@ scrape_configs:
       - targets: ["localhost:9090"]
 
   - job_name: 'jmeter'
-    scrape_interval: 5s
+    scrape_interval: 1s
     static_configs:
       - targets: ['192.168.0.107:9270']
 
