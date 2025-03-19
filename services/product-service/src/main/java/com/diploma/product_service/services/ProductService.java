@@ -65,13 +65,14 @@ public class ProductService {
         for (int i = 0; i < storedProducts.size(); i++) {
             var product = storedProducts.get(i);
             var productRequest = sortedRequest.get(i);
-            if (product.getCurrentQuantity() < productRequest.quantity()) {
+            if (product.getCurrentQuantity() < productRequest.requestedQuantity()) {
                 throw new ProductBuyException("Insufficient stock quantity for product with ID:: " + productRequest.productId());
             }
-            var newAvailableQuantity = product.getCurrentQuantity() - productRequest.quantity();
+            // var newAvailableQuantity = product.getCurrentQuantity() - productRequest.requestedQuantity();
+            var newAvailableQuantity = productRequest.requestedQuantity(); // установил это значение, чтобы не париться с убывающим числом количества при снятии метрик
             product.setCurrentQuantity(newAvailableQuantity);
             repository.save(product);
-            boughtProducts.add(mapper.toProductBuyResponse(product, productRequest.quantity()));
+            boughtProducts.add(mapper.toProductBuyResponse(product, productRequest.requestedQuantity()));
         }
         return boughtProducts;
     }
