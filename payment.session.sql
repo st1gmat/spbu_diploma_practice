@@ -2,5 +2,5 @@
 -- TRUNCATE TABLE payment;
 
 DROP TABLE IF EXISTS payment CASCADE;
-
+ 
 DROP SEQUENCE IF EXISTS payment_seq;
