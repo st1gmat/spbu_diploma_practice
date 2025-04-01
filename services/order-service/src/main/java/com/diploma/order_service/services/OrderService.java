@@ -1,24 +1,25 @@
 package com.diploma.order_service.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.time.Instant;
 
 import org.springframework.stereotype.Service;
-
 import com.diploma.order_service.exceptions.BusinessException;
+import com.diploma.order_service.models.order.Order;
 import com.diploma.order_service.models.order.OrderConfirmation;
-import com.diploma.order_service.models.order.OrderLineRequest;
+import com.diploma.order_service.models.order.OrderLine;
 import com.diploma.order_service.models.order.OrderRequest;
 import com.diploma.order_service.models.order.OrderResponse;
+import com.diploma.order_service.models.order.PaymentMethod;
 import com.diploma.order_service.models.payment.PaymentRequest;
-import com.diploma.order_service.models.product.BuyRequest;
 import com.diploma.order_service.repository.OrderRepository;
 import com.diploma.order_service.requests.CustomerClient;
 import com.diploma.order_service.requests.PaymentClient;
 import com.diploma.order_service.requests.ProductClient;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -32,56 +33,158 @@ public class OrderService {
     private final OrderProducer orderProducer;
     private final PaymentClient paymentClient;
 
-    public Integer createOrder(OrderRequest request) {
-        // DevNotes: ****************************
-        // проверить покупателя (существует ли?) = +
-        // оформить товар, т.е. order-service -> product-service = +
-        // сохранить заказ в бд = +
-        // сохранить строки в заказе = +
-        // реализовать процесс оплаты = -
-        // + возможно, добавить подтверждение заказа (notification-service), если это
-        // уместно будет
-        // ****************************
+    // DevNotes: ****************************
+    // проверить покупателя (существует ли?) = +
+    // оформить товар, т.е. order-service -> product-service = +
+    // сохранить заказ в бд = +
+    // сохранить строки в заказе = +
+    // реализовать процесс оплаты = +
+    // подтверждение заказа (notification-service)
+    // ****************************
 
-        // check customer
-        var customer = customerClient.findById(request.customerId()).orElseThrow(() -> new BusinessException(
-                "order creation failed: there is no customer with ID: " + request.customerId()));
+// return customerClient.existsById(request.customerId())
+        //         .filter(Boolean::booleanValue)
+        //         .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
+        //         .flatMap(customer -> {
+        //             Order order = Order.builder()
+        //                     .reference(request.reference())
+        //                     .customerId(request.customerId())
+        //                     .paymentMethod(request.paymentMethod().name())
+        //                     .totalAmount(BigDecimal.ZERO)
+        //                     .createdDate(Instant.now())
+        //                     .lastModifiedDate(Instant.now())
+        //                     .build();
 
-        // buy the products
-        var buyProducts = productClient.buyProducts(request.products());
+        //             return orderRepository.save(order)
+        //                     .flatMap(savedOrder -> orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
+        //                             .collectList()
+        //                             .flatMap(orderLines -> {
+        //                                 BigDecimal total = orderLines.stream()
+        //                                         .map(OrderLine::getQuantity)
+        //                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // save order to db
-        var order = orderRepository.save(orderMapper.toOrder(request));
+        //                                 savedOrder.setTotalAmount(total);
 
-        // save order lines to db
-        for (BuyRequest buyRequest : request.products()) {
-            orderLineService.saveOrderLine(
-                    new OrderLineRequest(null, order.getId(), buyRequest.productId(), buyRequest.requestedQuantity()));
+        //                                 return orderRepository.save(savedOrder)
+        //                                         .then(productClient.buy(request.products()))
+        //                                         .then(paymentClient.pay(new PaymentRequest(
+        //                                                 savedOrder.getTotalAmount(),
+        //                                                 PaymentMethod.valueOf(savedOrder.getPaymentMethod()),
+        //                                                 savedOrder.getId(),
+        //                                                 savedOrder.getReference(),
+        //                                                 customer)))
+        //                                         .then(orderProducer.sendOrder(new OrderConfirmation(
+        //                                                 savedOrder.getReference(),
+        //                                                 savedOrder.getTotalAmount(),
+        //                                                 PaymentMethod.valueOf(savedOrder.getPaymentMethod()),
+        //                                                 null,
+        //                                                 null)))
+        //                                         .thenReturn(savedOrder.getId());
+        //                             }));
+        //         });
 
-        }
-
-        // sending request to payment service
-        paymentClient.requestOrderPayment(new PaymentRequest(request.requestedAmount(), request.paymentMethod(),
-                order.getId(), order.getReference(), customer));
+    public Mono<Integer> createOrder(OrderRequest request) { 
         
-        // sending message to kafka to confirm order
-        orderProducer.sendOrderConfirmation(
-                new OrderConfirmation(request.reference(), request.requestedAmount(), request.paymentMethod(), customer,
-                        buyProducts));
+        // return customerClient.findById(request.customerId())
+        //         .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
+        //         .flatMap(customer -> {
+        //                 Order order = Order.builder()
+        //                         .reference(request.reference())
+        //                         .customerId(request.customerId())
+        //                         .paymentMethod(request.paymentMethod().name())
+        //                         .totalAmount(BigDecimal.ZERO)
+        //                         .createdDate(Instant.now())
+        //                         .lastModifiedDate(Instant.now())
+        //                         .build();
+        //                 return orderRepository.save(order)
+        //                         .flatMap(savedOrder -> orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
+        //                                 .collectList()
+        //                                 .flatMap(orderLines -> {
+        //                                         BigDecimal total = orderLines.stream()
+        //                                                 .map(OrderLine::getQuantity)
+        //                                                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return order.getId();
+        //                                         savedOrder.setTotalAmount(total);
+
+        //                                         return orderRepository.save(savedOrder)
+        //                                                 .then(productClient.buy(request.products()))
+        //                                                 .flatMap((List<BuyResponse> responses) -> paymentClient.pay(new PaymentRequest(savedOrder.getTotalAmount(),
+        //                                                 PaymentMethod.valueOf(savedOrder.getPaymentMethod()),
+        //                                                 savedOrder.getId(),
+        //                                                 savedOrder.getReference(),
+        //                                                 customer))
+        //                                                 .then(orderProducer.sendOrder(new OrderConfirmation(
+        //                                                         orderReference, 
+        //                                                         total,  
+        //                                                         PaymentMethod.valueOf(savedOrder.getPaymentMethod()), 
+        //                                                         customer, 
+        //                                                         responses)))
+        //                                                 .thenReturn(saved)
+        //                                                 // .then(paymentClient.pay(new PaymentRequest(
+        //                                                 //         savedOrder.getTotalAmount(),
+        //                                                 //         PaymentMethod.valueOf(savedOrder.getPaymentMethod()),
+        //                                                 //         savedOrder.getId(),
+        //                                                 //         savedOrder.getReference(),
+        //                                                 //         customer)))
+        //                                                 // .then(orderProducer.sendOrder(new OrderConfirmation(
+        //                                                 //         savedOrder.getReference(),
+        //                                                 //         savedOrder.getTotalAmount(),
+        //                                                 //         PaymentMethod.valueOf(savedOrder.getPaymentMethod()),
+        //                                                 //         customer,
+        //                                                 //         null)))
+        //                                                 // .thenReturn(savedOrder.getId());
+        //                                 }));   
+        //         });
+        return customerClient.findById(request.customerId())
+                .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
+                .flatMap(customer -> {
+                    Order order = Order.builder()
+                            .reference(request.reference())
+                            .customerId(request.customerId())
+                            .paymentMethod(request.paymentMethod().name())
+                            .totalAmount(BigDecimal.ZERO)
+                            .createdDate(Instant.now())
+                            .lastModifiedDate(Instant.now())
+                            .build();
+
+                    return orderRepository.save(order)
+                            .flatMap(savedOrder -> orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
+                                    .collectList()
+                                    .flatMap(orderLines -> {
+                                        BigDecimal total = orderLines.stream()
+                                                .map(OrderLine::getQuantity)
+                                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                                        savedOrder.setTotalAmount(total);
+
+                                        return orderRepository.save(savedOrder)
+                                                .flatMap(updatedOrder -> productClient.buy(request.products())
+                                                        .flatMap(responses -> paymentClient.pay(new PaymentRequest(
+                                                                        updatedOrder.getTotalAmount(),
+                                                                        PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
+                                                                        updatedOrder.getId(),
+                                                                        updatedOrder.getReference(),
+                                                                        customer))
+                                                                .then(orderProducer.sendOrder(new OrderConfirmation(
+                                                                        updatedOrder.getReference(),
+                                                                        updatedOrder.getTotalAmount(),
+                                                                        PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
+                                                                        customer,
+                                                                        responses)))
+                                                                .thenReturn(updatedOrder.getId())));
+                                    }));
+                });
     }
 
-    public List<OrderResponse> findAll() {
-        return orderRepository.findAll().stream()
-                .map(orderMapper::fromOrder).collect(Collectors.toList());
-
+    public Mono<OrderResponse> findById(Integer id) {
+        return orderRepository.findById(id)
+                .switchIfEmpty(Mono.error(new BusinessException("Order not found")))
+                .map(orderMapper::fromOrder);
     }
 
-    public OrderResponse findById(Integer orderId) {
-        return orderRepository.findById(orderId)
-                .map(orderMapper::fromOrder)
-                .orElseThrow(() -> new EntityNotFoundException("OrderResponse findById:: cant find order by id"));
+    public Flux<OrderResponse> findAll() {
+        return orderRepository.findAll()
+                .map(orderMapper::fromOrder);
     }
 
 }

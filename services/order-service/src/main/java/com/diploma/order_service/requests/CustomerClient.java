@@ -1,17 +1,37 @@
 package com.diploma.order_service.requests;
 
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
-import com.diploma.order_service.configs.FeignConfig;
 import com.diploma.order_service.models.customer.CustomerResponse;
 
-@FeignClient(name = "customer-service", url = "${application.config.customer-url}", configuration = FeignConfig.class)
-public interface CustomerClient {
+import reactor.core.publisher.Mono;
 
-    @GetMapping("/{customer_id}")
-    public Optional<CustomerResponse> findById(@PathVariable("customer_id") String customerId);
+@Service
+@RequiredArgsConstructor
+public class CustomerClient {
+
+    private final WebClient webClient;
+
+    @Value("${application.config.customer-url}")
+    private String customerUrl;
+
+    public Mono<Boolean> existsById(String customerId) {
+        return webClient.get()
+                .uri(customerUrl + "/" + customerId)
+                .retrieve()
+                .bodyToMono(CustomerResponse.class) // or CustomerResponse.class if needed
+                .map(response -> true)
+                .onErrorResume(e -> Mono.just(false));
+    }
+
+    public Mono<CustomerResponse> findById(String customerId) {
+        return webClient.get()
+                .uri(customerUrl + "/" + customerId)
+                .retrieve()
+                .bodyToMono(CustomerResponse.class) // or CustomerResponse.class if needed
+                .onErrorResume(e -> Mono.just(null));
+    }
 }
