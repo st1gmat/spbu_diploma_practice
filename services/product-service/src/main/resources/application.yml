@@ -12,5 +12,15 @@ spring:
     application:
         name: product-service
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include:
+        - prometheus
+
 server:
     port: ${PRODUCT_SERVICE_PORT:8345}

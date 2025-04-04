@@ -8,13 +8,23 @@ spring:
     user: ${PAYMENT_PG_USERNAME:root}
     password: ${PAYMENT_PG_PASSWORD:root}
     locations: classpath:db/migration
-kafka:
-  producer:
-    bootstrap-servers: localhost:9092
-    key-serializer: org.apache.kafka.common.serialization.StringSerializer
-    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    properties:
-      spring.json.type.mapping: paymentConfirmation:com.diploma.payment_service.models.PaymentNotificationRequest
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: paymentConfirmation:com.diploma.payment_service.models.PaymentNotificationRequest
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include:
+        - prometheus
 
 server:
   port: ${PAYMENT_SERVICE_PORT:9324}

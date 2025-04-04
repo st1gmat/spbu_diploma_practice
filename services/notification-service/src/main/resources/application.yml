@@ -44,5 +44,15 @@ spring:
         spring.json.trusted.packages: '*'
         spring.json.type.mapping: orderConfirmation:com.diploma.notification_service.models.OrderConfirmation,paymentConfirmation:com.diploma.notification_service.models.PaymentConfirmation
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include:
+        - prometheus
+
 server: 
     port: ${NOTIF_SERVICE_PORT:8257}

@@ -25,6 +25,15 @@ spring:
   application:
     name: order-service
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include:
+        - prometheus
 
 # URLs for open feign via api gateway
 application:

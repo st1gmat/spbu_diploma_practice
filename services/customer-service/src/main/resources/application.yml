@@ -10,5 +10,15 @@ spring:
     application:
         name: customer-service
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include:
+        - prometheus
+
 server: 
     port: ${CUST_SERVICE_PORT:8090}
