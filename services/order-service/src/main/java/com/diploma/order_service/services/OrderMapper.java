@@ -1,5 +1,7 @@
 package com.diploma.order_service.services;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 import com.diploma.order_service.models.order.Order;
@@ -11,6 +13,7 @@ public class OrderMapper {
     public Order toOrder(OrderRequest request) {
         return Order.builder()
         .id(request.id())
+        .createdDate(LocalDateTime.now())
         .reference(request.reference())
         .totalAmount(request.requestedAmount())
         .paymentMethod(request.paymentMethod())
