@@ -5,7 +5,7 @@ global:
 scrape_configs:
   - job_name: "prometheus"
     static_configs:
-      - targets: ["localhost:9090"]
+      - targets: ["docker.internal.host:9090"]
 
   - job_name: 'jmeter'
     scrape_interval: 5s
@@ -17,12 +17,12 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets:
-          - "172.21.218.219:8090" # Customer Service
-          - "172.21.218.219:8257" # Notification Service
-          - "172.21.218.219:8633" # Order Service
-          - "172.21.218.219:9324" # Payment Service
-          - "docker.internal.host:8345" # Product Service
+          - "192.168.10.100:8090" # Customer Service
+          - "192.168.10.100:8257" # Notification Service
+          - "192.168.10.100:8633" # Order Service
+          - "192.168.10.100:9324" # Payment Service
+          - "192.168.10.100:8345" # Product Service
 
   - job_name: "kafka"
     static_configs:
-      - targets: ["localhost:9092"]
+      - targets: ["docker.internal.host:9092"]
