@@ -2,6 +2,9 @@ package com.diploma.order_service.requests;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,6 +20,11 @@ public class PaymentClient {
     @Value("${application.config.payment-url}")
     private String paymentServiceUrl;
 
+    @Retryable(
+        value = { Exception.class },
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000)
+    )
     public void requestOrderPayment(PaymentRequest request) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -36,5 +44,11 @@ public class PaymentClient {
         } catch (Exception e) {
             throw new RuntimeException("Payment request failed", e);
         }
+    }
+
+    @Recover
+    public void recover(Exception e, PaymentRequest request) {
+        System.out.println("[Fallback] Payment failed after retries for orderId: " + request.orderId());
+        // Здесь можно добавить сохранение в БД для повторной отправки
     }
 }
