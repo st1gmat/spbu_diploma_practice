@@ -1,1 +1,38 @@
-spring.application.name=order-service
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/order
+    user: ${PG_USERNAME:root}
+    password: ${PG_PASSWORD:root}
+  flyway:
+    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/order
+    user: ${PG_USERNAME:root}
+    password: ${PG_PASSWORD:root}
+    locations: classpath:db/migration
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: orderConfirmation:com.diploma.order_service.models.order.OrderConfirmation
+  application:
+    name: order-service
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include:
+        - prometheus
+
+# URLs for open feign via api gateway
+application:
+    config:
+        customer-url: http://${CUSTOMER_SERVICE_HOST:localhost}:${CUST_SERVICE_PORT:8090}/api/v1/customer
+        product-url: http://${PRODUCT_SERVICE_HOST:localhost}:${PRODUCT_SERVICE_PORT:8345}/api/v1/product
+        payment-url: http://${PAYMENT_SERVICE_HOST:localhost}:${PAYMENT_SERVICE_PORT:9324}/api/v1/payment
+server:
+  port: ${ORDER_SERVICE_PORT:8633} 
