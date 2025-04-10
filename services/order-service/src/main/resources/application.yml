@@ -1,7 +1,7 @@
 spring:
   r2dbc:
     url: r2dbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/order
-    user: ${PG_USERNAME:root}
+    username: ${PG_USERNAME:root}
     password: ${PG_PASSWORD:root}
   flyway:
     url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/order
