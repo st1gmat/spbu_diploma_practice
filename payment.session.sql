@@ -1,0 +1,6 @@
+ALTER SEQUENCE payment_id_seq RESTART WITH 1;
+TRUNCATE TABLE payment;
+
+-- DROP TABLE IF EXISTS payment CASCADE;
+ 
+-- DROP SEQUENCE IF EXISTS payment_id_seq;

@@ -1,0 +1,1 @@
+UPDATE product SET available_quantity = 1;
