@@ -9,6 +9,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 
@@ -32,7 +33,7 @@ public class WebClientConfig {
 
     private WebClient createWebClient(String poolName) {
         ConnectionProvider connectionProvider = ConnectionProvider.builder(poolName)
-            .maxConnections(250)                      // сбалансировано: не слишком много, но и не душим
+            .maxConnections(250)                      // сбалансировано: не слишком много
             .pendingAcquireMaxCount(1000)             // сколько потоков может ждать свободное соединение
             .pendingAcquireTimeout(Duration.ofSeconds(20)) // ждем соединение максимум 20 секунд
             .evictInBackground(Duration.ofSeconds(30))     // чистим соединения, которые простаивают
@@ -50,6 +51,10 @@ public class WebClientConfig {
 
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
+                // Добавляем фильтр, который при ошибке повторяет запрос 3 раза с задержкой 100 мс.
+                .filter((request, next) ->
+                        next.exchange(request)
+                            .retryWhen(Retry.fixedDelay(3, Duration.ofMillis(100))))
                 .build();
     }
 }
