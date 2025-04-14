@@ -34,7 +34,7 @@ public class ProductClient {
     @Retryable(
         value = { Exception.class },
         maxAttempts = 3,
-        backoff = @Backoff(delay = 2000)
+        backoff = @Backoff(delay = 2000, multiplier = 1.5, maxDelay = 4000)
     )
     public List<BuyResponse> buyProducts(List<BuyRequest> request) {
         HttpHeaders headers = new HttpHeaders();
