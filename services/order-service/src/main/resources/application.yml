@@ -34,5 +34,30 @@ application:
         customer-url: http://${CUSTOMER_SERVICE_HOST:localhost}:${CUST_SERVICE_PORT:8090}/api/v1/customer
         product-url: http://${PRODUCT_SERVICE_HOST:localhost}:${PRODUCT_SERVICE_PORT:8345}/api/v1/product
         payment-url: http://${PAYMENT_SERVICE_HOST:localhost}:${PAYMENT_SERVICE_PORT:9324}/api/v1/payment
+
+resilience4j:
+  retry:
+    instances:
+      productServiceRetry:
+        maxAttempts: 4
+        waitDuration: 5s
+        retryExceptions:
+          - org.springframework.web.reactive.function.client.WebClientRequestException
+
+  circuitbreaker:
+    instances:
+      productServiceCircuitBreaker:
+        slidingWindowSize: 50
+        minimumNumberOfCalls: 20
+        failureRateThreshold: 50
+        waitDurationInOpenState: 20s
+        permittedNumberOfCallsInHalfOpenState: 5
+
+  bulkhead:
+    instances:
+      productServiceBulkhead:
+        maxConcurrentCalls: 50
+        maxWaitDuration: 0
+
 server:
   port: ${ORDER_SERVICE_PORT:8633} 
