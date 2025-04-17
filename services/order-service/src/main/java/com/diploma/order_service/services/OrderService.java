@@ -42,101 +42,102 @@ public class OrderService {
     // подтверждение заказа (notification-service)
     // ****************************
 
+        // public Mono<Integer> createOrder(OrderRequest request) {
+        //         return customerClient.findById(request.customerId())
+        //                 .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
+        //                 .flatMap(customer -> {
+        //                 Order order = Order.builder()
+        //                         .reference(request.reference())
+        //                         .customerId(request.customerId())
+        //                         .paymentMethod(request.paymentMethod().name())
+        //                         .totalAmount(BigDecimal.ZERO)
+        //                         .createdDate(Instant.now())
+        //                         .lastModifiedDate(Instant.now())
+        //                         .build();
+        
+        //                 return orderRepository.save(order)
+        //                         .flatMap(savedOrder ->
+        //                                 orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
+        //                                         .collectList()
+        //                                         .flatMap(orderLines -> {
+        //                                                 BigDecimal total = orderLines.stream()
+        //                                                         .map(OrderLine::getQuantity)
+        //                                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        //                                                 savedOrder.setTotalAmount(total);
+        
+        //                                                 return orderRepository.save(savedOrder)
+        //                                                         .flatMap(updatedOrder -> {
+        //                                                         // Ограничиваем параллельность к product-сервису
+        //                                                         return Flux.just(request.products())
+        //                                                                 .flatMap(productClient::buy, 40)
+        //                                                                 .next() // потому что collectList() уже внутри клиента
+        //                                                                 .flatMap(responses -> {
+        //                                                                         // Ограничиваем параллельность к payment-сервису
+        //                                                                         return Mono.just(new PaymentRequest(
+        //                                                                                 updatedOrder.getTotalAmount(),
+        //                                                                                 PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
+        //                                                                                 updatedOrder.getId(),
+        //                                                                                 updatedOrder.getReference(),
+        //                                                                                 customer))
+        //                                                                                 .flatMap(paymentClient::pay)
+        //                                                                                 .then(orderProducer.sendOrder(new OrderConfirmation(
+        //                                                                                         updatedOrder.getReference(),
+        //                                                                                         updatedOrder.getTotalAmount(),
+        //                                                                                         PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
+        //                                                                                         customer,
+        //                                                                                         responses)))
+        //                                                                                 .thenReturn(updatedOrder.getId());
+        //                                                                         });
+        //                                                         });
+        //                                                 }));
+        //                 });
+        // }
 
-//     public Mono<Integer> createOrder(OrderRequest request) { 
 
-//         return customerClient.findById(request.customerId())
-//                 .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
-//                 .flatMap(customer -> {
-//                     Order order = Order.builder()
-//                             .reference(request.reference())
-//                             .customerId(request.customerId())
-//                             .paymentMethod(request.paymentMethod().name())
-//                             .totalAmount(BigDecimal.ZERO)
-//                             .createdDate(Instant.now())
-//                             .lastModifiedDate(Instant.now())
-//                             .build();
-
-//                     return orderRepository.save(order)
-//                             .flatMap(savedOrder -> orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
-//                                     .collectList()
-//                                     .flatMap(orderLines -> {
-//                                         BigDecimal total = orderLines.stream()
-//                                                 .map(OrderLine::getQuantity)
-//                                                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-//                                         savedOrder.setTotalAmount(total);
-
-//                                         return orderRepository.save(savedOrder)
-//                                                 .flatMap(updatedOrder -> productClient.buy(request.products())
-//                                                         .flatMap(responses -> paymentClient.pay(new PaymentRequest(
-//                                                                         updatedOrder.getTotalAmount(),
-//                                                                         PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
-//                                                                         updatedOrder.getId(),
-//                                                                         updatedOrder.getReference(),
-//                                                                         customer))
-//                                                                 .then(orderProducer.sendOrder(new OrderConfirmation(
-//                                                                         updatedOrder.getReference(),
-//                                                                         updatedOrder.getTotalAmount(),
-//                                                                         PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
-//                                                                         customer,
-//                                                                         responses)))
-//                                                                 .thenReturn(updatedOrder.getId())));
-//                                     }));
-//                 });
-//     }
-
-public Mono<Integer> createOrder(OrderRequest request) {
-        return customerClient.findById(request.customerId())
-                .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
-                .flatMap(customer -> {
-                    Order order = Order.builder()
-                            .reference(request.reference())
-                            .customerId(request.customerId())
-                            .paymentMethod(request.paymentMethod().name())
-                            .totalAmount(BigDecimal.ZERO)
-                            .createdDate(Instant.now())
-                            .lastModifiedDate(Instant.now())
-                            .build();
-    
-                    return orderRepository.save(order)
-                            .flatMap(savedOrder ->
-                                    orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
+        public Mono<Integer> createOrder(OrderRequest request) { 
+                return customerClient.findById(request.customerId())
+                        .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
+                        .flatMap(customer -> {
+                            Order order = Order.builder()
+                                    .reference(request.reference())
+                                    .customerId(request.customerId())
+                                    .paymentMethod(request.paymentMethod().name())
+                                    .totalAmount(BigDecimal.ZERO)
+                                    .createdDate(Instant.now())
+                                    .lastModifiedDate(Instant.now())
+                                    .build();
+        
+                            return orderRepository.save(order)
+                                    .flatMap(savedOrder -> orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
                                             .collectList()
                                             .flatMap(orderLines -> {
                                                 BigDecimal total = orderLines.stream()
                                                         .map(OrderLine::getQuantity)
                                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
-    
+        
                                                 savedOrder.setTotalAmount(total);
-    
+        
                                                 return orderRepository.save(savedOrder)
-                                                        .flatMap(updatedOrder -> {
-                                                            // Ограничиваем параллельность к product-сервису
-                                                            return Flux.just(request.products())
-                                                                    .flatMap(productClient::buy, 20)
-                                                                    .next() // потому что collectList() уже внутри клиента
-                                                                    .flatMap(responses -> {
-                                                                        // Ограничиваем параллельность к payment-сервису
-                                                                        return Mono.just(new PaymentRequest(
-                                                                                    updatedOrder.getTotalAmount(),
-                                                                                    PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
-                                                                                    updatedOrder.getId(),
-                                                                                    updatedOrder.getReference(),
-                                                                                    customer))
-                                                                                .flatMap(paymentClient::pay)
-                                                                                .then(orderProducer.sendOrder(new OrderConfirmation(
-                                                                                        updatedOrder.getReference(),
-                                                                                        updatedOrder.getTotalAmount(),
-                                                                                        PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
-                                                                                        customer,
-                                                                                        responses)))
-                                                                                .thenReturn(updatedOrder.getId());
-                                                                        });
-                                                        });
-                                                }));
-                });
-        }
+                                                        .flatMap(updatedOrder -> productClient.buy(request.products())
+                                                                .flatMap(responses -> paymentClient.pay(new PaymentRequest(
+                                                                                updatedOrder.getTotalAmount(),
+                                                                                PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
+                                                                                updatedOrder.getId(),
+                                                                                updatedOrder.getReference(),
+                                                                                customer))
+                                                                        .then(orderProducer.sendOrder(new OrderConfirmation(
+                                                                                updatedOrder.getReference(),
+                                                                                updatedOrder.getTotalAmount(),
+                                                                                PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
+                                                                                customer,
+                                                                                responses)))
+                                                                        .thenReturn(updatedOrder.getId())));
+                                            }));
+                        });
+            }
+
+
     
 
     public Mono<OrderResponse> findById(Integer id) {
