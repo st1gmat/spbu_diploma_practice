@@ -41,7 +41,7 @@ public class OrderService {
 
     private final RetryRegistry retryRegistry;
     private final CircuitBreakerRegistry circuitBreakerRegistry;
-    private final BulkheadRegistry bulkheadRegistry;
+    // private final BulkheadRegistry bulkheadRegistry;
 
     // DevNotes: ****************************
     // проверить покупателя (существует ли?) = +
@@ -81,13 +81,14 @@ public class OrderService {
                                                             // Загружаем resilient-операторы
                                                             var retry = retryRegistry.retry("productServiceRetry");
                                                             var circuitBreaker = circuitBreakerRegistry.circuitBreaker("productServiceCircuitBreaker");
-                                                            var bulkhead = bulkheadRegistry.bulkhead("productServiceBulkhead");
+                                                            // var bulkhead = bulkheadRegistry.bulkhead("productServiceBulkhead");
 
                                                             return Flux.just(request.products())
                                                                     .flatMap(products -> productClient.buy(products)
+                                                                        // .transformDeferred(BulkheadOperator.of(bulkhead))
+                                                                        .transformDeferred(RetryOperator.of(retry)))
                                                                         .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                                                                        .transformDeferred(BulkheadOperator.of(bulkhead))
-                                                                        .transformDeferred(RetryOperator.of(retry)), 20)
+
                                                                     .next()
                                                                     .flatMap(responses -> {
                                                                         return Mono.just(new PaymentRequest(
