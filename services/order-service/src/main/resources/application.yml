@@ -27,6 +27,11 @@ management:
       exposure:
         include:
         - prometheus
+        - health
+        - metrics
+  metrics:
+    enable:
+      all: true
 
 # URLs for open feign via api gateway
 application:
@@ -39,19 +44,26 @@ resilience4j:
   retry:
     instances:
       productServiceRetry:
-        maxAttempts: 4
-        waitDuration: 5s
+        maxAttempts: 3                # 1 основная + 2 повтора
+        waitDuration: 4s             # 1 секунда между попытками
         retryExceptions:
           - org.springframework.web.reactive.function.client.WebClientRequestException
+          - java.io.IOException
+        ignoreExceptions:
+          - com.diploma.order_service.exceptions.BusinessException
+        failAfterMaxAttempts: true
+
 
   circuitbreaker:
     instances:
       productServiceCircuitBreaker:
-        slidingWindowSize: 50
-        minimumNumberOfCalls: 20
-        failureRateThreshold: 50
-        waitDurationInOpenState: 20s
-        permittedNumberOfCallsInHalfOpenState: 5
+        slidingWindowType: TIME_BASED
+        slidingWindowSize: 10         # собираем статистику за последние 10 секунд
+        minimumNumberOfCalls: 100      # минимум 100 вызовов для оценки
+        failureRateThreshold: 50       # если >50% неудачные — открыть
+        waitDurationInOpenState: 30s   # 30 секунд ждать перед retry
+        permittedNumberOfCallsInHalfOpenState: 5  # сколько пробных вызовов при переходе в HALF_OPEN
+        automaticTransitionFromOpenToHalfOpenEnabled: true
 
   bulkhead:
     instances:
