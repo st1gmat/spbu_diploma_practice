@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      host: redis
+      port: 6379
   r2dbc:
     url: r2dbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/order
     username: ${PG_USERNAME:root}

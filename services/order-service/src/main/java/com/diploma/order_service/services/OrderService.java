@@ -17,9 +17,9 @@ import com.diploma.order_service.requests.CustomerClient;
 import com.diploma.order_service.requests.PaymentClient;
 import com.diploma.order_service.requests.ProductClient;
 
-import io.github.resilience4j.bulkhead.BulkheadRegistry;
+// import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.reactor.bulkhead.operator.BulkheadOperator;
+// import io.github.resilience4j.reactor.bulkhead.operator.BulkheadOperator;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
 import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.RetryRegistry;
@@ -56,60 +56,54 @@ public class OrderService {
         return customerClient.findById(request.customerId())
                 .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
                 .flatMap(customer -> {
-                    Order order = Order.builder()
-                            .reference(request.reference())
-                            .customerId(request.customerId())
-                            .paymentMethod(request.paymentMethod().name())
-                            .totalAmount(BigDecimal.ZERO)
-                            .createdDate(Instant.now())
-                            .lastModifiedDate(Instant.now())
-                            .build();
+                        Order order = Order.builder()
+                                .reference(request.reference())
+                                .customerId(request.customerId())
+                                .paymentMethod(request.paymentMethod().name())
+                                .totalAmount(BigDecimal.ZERO)
+                                .createdDate(Instant.now())
+                                .lastModifiedDate(Instant.now())
+                                .build();
 
-                    return orderRepository.save(order)
-                            .flatMap(savedOrder ->
-                                    orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
-                                            .collectList()
-                                            .flatMap(orderLines -> {
-                                                BigDecimal total = orderLines.stream()
-                                                        .map(OrderLine::getQuantity)
-                                                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                                                savedOrder.setTotalAmount(total);
-
-                                                return orderRepository.save(savedOrder)
-                                                        .flatMap(updatedOrder -> {
-                                                            // Загружаем resilient-операторы
-                                                            var retry = retryRegistry.retry("productServiceRetry");
-                                                            var circuitBreaker = circuitBreakerRegistry.circuitBreaker("productServiceCircuitBreaker");
-                                                            // var bulkhead = bulkheadRegistry.bulkhead("productServiceBulkhead");
-
-                                                            return Flux.just(request.products())
-                                                                    .flatMap(products -> productClient.buy(products)
-                                                                        // .transformDeferred(BulkheadOperator.of(bulkhead))
-                                                                        .transformDeferred(RetryOperator.of(retry)))
-                                                                        .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-
-                                                                    .next()
-                                                                    .flatMap(responses -> {
-                                                                        return Mono.just(new PaymentRequest(
-                                                                                    updatedOrder.getTotalAmount(),
-                                                                                    PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
-                                                                                    updatedOrder.getId(),
-                                                                                    updatedOrder.getReference(),
-                                                                                    customer))
-                                                                                .flatMap(paymentClient::pay)
-                                                                                .then(orderProducer.sendOrder(new OrderConfirmation(
-                                                                                        updatedOrder.getReference(),
+                        return orderRepository.save(order)
+                                .flatMap(savedOrder ->
+                                        orderLineService.createOrderLinesFromBuyRequests(savedOrder.getId(), request.products())
+                                                .collectList()
+                                                .flatMap(orderLines -> {
+                                                        BigDecimal total = orderLines.stream()
+                                                                .map(OrderLine::getQuantity)
+                                                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    
+                                                        savedOrder.setTotalAmount(total);
+                    
+                                                        return orderRepository.save(savedOrder)
+                                                                .flatMap(updatedOrder -> {
+                                                                        var retry = retryRegistry.retry("productServiceRetry");
+                                                                        var circuitBreaker = circuitBreakerRegistry.circuitBreaker("productServiceCircuitBreaker");
+                                
+                                                                        return Mono.defer(() -> productClient.buy(request.products()))
+                                                                                .transformDeferred(RetryOperator.of(retry))
+                                                                                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                                                                                .flatMap(responses -> Mono.just(new PaymentRequest(
                                                                                         updatedOrder.getTotalAmount(),
                                                                                         PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
-                                                                                        customer,
-                                                                                        responses)))
-                                                                                .thenReturn(updatedOrder.getId());
-                                                                    });
-                                                        });
-                                            }));
+                                                                                        updatedOrder.getId(),
+                                                                                        updatedOrder.getReference(),
+                                                                                        customer))
+                                                                                        .flatMap(paymentClient::pay)
+                                                                                        .then(orderProducer.sendOrder(new OrderConfirmation(
+                                                                                                updatedOrder.getReference(),
+                                                                                                updatedOrder.getTotalAmount(),
+                                                                                                PaymentMethod.valueOf(updatedOrder.getPaymentMethod()),
+                                                                                                customer,
+                                                                                                responses)))
+                                                                                        .thenReturn(updatedOrder.getId()));
+                                                                });
+                                                })
+                                );
                 });
     }
+
 
     public Mono<OrderResponse> findById(Integer id) {
         return orderRepository.findById(id)
