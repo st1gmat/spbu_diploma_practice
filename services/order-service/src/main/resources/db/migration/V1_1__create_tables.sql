@@ -5,7 +5,8 @@ CREATE TABLE customer_order (
     payment_method VARCHAR(255),
     customer_id VARCHAR(255),
     created_date TIMESTAMP NOT NULL,
-    last_modified_date TIMESTAMP
+    last_modified_date TIMESTAMP,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING'
 );
 
 CREATE TABLE order_line (

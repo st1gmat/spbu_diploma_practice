@@ -26,6 +26,8 @@ public class Order {
 
     private String paymentMethod; // enum может быть сохранён как String
 
+    private String status;
+
     private String customerId;
 
     private Instant createdDate;

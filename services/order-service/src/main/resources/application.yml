@@ -44,8 +44,10 @@ resilience4j:
   retry:
     instances:
       productServiceRetry:
-        maxAttempts: 3                # 1 основная + 2 повтора
-        waitDuration: 4s             # 1 секунда между попытками
+        maxAttempts: 3
+        waitDuration: 4s
+        exponentialBackoffMultiplier: 1.5
+        # randomizedWait: true
         retryExceptions:
           - org.springframework.web.reactive.function.client.WebClientRequestException
           - java.io.IOException
@@ -65,11 +67,11 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 5  # сколько пробных вызовов при переходе в HALF_OPEN
         automaticTransitionFromOpenToHalfOpenEnabled: true
 
-  bulkhead:
-    instances:
-      productServiceBulkhead:
-        maxConcurrentCalls: 50
-        maxWaitDuration: 0
+  # bulkhead:
+  #   instances:
+  #     productServiceBulkhead:
+  #       maxConcurrentCalls: 50
+  #       maxWaitDuration: 0
 
 server:
   port: ${ORDER_SERVICE_PORT:8633} 
