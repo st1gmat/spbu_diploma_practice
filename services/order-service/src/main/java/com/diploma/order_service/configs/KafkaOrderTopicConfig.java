@@ -13,4 +13,13 @@ public class KafkaOrderTopicConfig {
         return TopicBuilder.name("order-topic").build();
     }
 
+    @Bean
+    public NewTopic buyRequestTopic() {
+        return TopicBuilder.name("buy-request-topic").partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic buyRequestDlqTopic() {
+        return TopicBuilder.name("buy-request-dlq-topic").partitions(1).replicas(1).build();
+    }
 }
