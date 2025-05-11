@@ -23,11 +23,11 @@ public class CustomerClient {
     @Value("${application.config.customer-url}")
     private String customerServiceUrl;
 
-    @Retryable(
-        value = { Exception.class },
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 1000)
-    )
+    // @Retryable(
+    //     value = { Exception.class },
+    //     maxAttempts = 3,
+    //     backoff = @Backoff(delay = 1000)
+    // )
     public Optional<CustomerResponse> findById(String customerId) {
         try {
             HttpHeaders headers = new HttpHeaders();

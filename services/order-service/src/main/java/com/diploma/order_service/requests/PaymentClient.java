@@ -20,11 +20,11 @@ public class PaymentClient {
     @Value("${application.config.payment-url}")
     private String paymentServiceUrl;
 
-    @Retryable(
-        value = { Exception.class },
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 1000)
-    )
+    // @Retryable(
+    //     value = { Exception.class },
+    //     maxAttempts = 3,
+    //     backoff = @Backoff(delay = 1000)
+    // )
     public void requestOrderPayment(PaymentRequest request) {
         try {
             HttpHeaders headers = new HttpHeaders();

@@ -31,10 +31,25 @@ public class ProductClient {
     @Value("${application.config.product-url}") 
     private String productUrl;
 
+    // @Retryable(
+    //     value = {
+    //         org.springframework.web.client.ResourceAccessException.class,
+    //         java.net.SocketTimeoutException.class,
+    //         java.io.IOException.class
+    //     },
+    //     exclude = { com.diploma.order_service.exceptions.BusinessException.class },
+    //     maxAttempts = 4,
+    //     backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 5000)
+    // )
     @Retryable(
-        value = { Exception.class },
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 2000, multiplier = 1.5, maxDelay = 4000)
+        value = {
+            org.springframework.web.client.ResourceAccessException.class,
+            java.net.SocketTimeoutException.class,
+            java.io.IOException.class
+        },
+        exclude = { com.diploma.order_service.exceptions.BusinessException.class },
+        maxAttempts = 3, // 1 вызов + 2 повтора = 3 попытки
+        backoff = @Backoff(delay = 1000, multiplier = 2.0, maxDelay = 3000)
     )
     public List<BuyResponse> buyProducts(List<BuyRequest> request) {
         HttpHeaders headers = new HttpHeaders();
