@@ -19,6 +19,8 @@ import com.diploma.order_service.exceptions.BusinessException;
 import com.diploma.order_service.models.product.BuyRequest;
 import com.diploma.order_service.models.product.BuyResponse;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,16 +43,19 @@ public class ProductClient {
     //     maxAttempts = 4,
     //     backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 5000)
     // )
-    @Retryable(
-        value = {
-            org.springframework.web.client.ResourceAccessException.class,
-            java.net.SocketTimeoutException.class,
-            java.io.IOException.class
-        },
-        exclude = { com.diploma.order_service.exceptions.BusinessException.class },
-        maxAttempts = 3, // 1 вызов + 2 повтора = 3 попытки
-        backoff = @Backoff(delay = 1000, multiplier = 2.0, maxDelay = 3000)
-    )
+    // @Retryable(
+    //     value = {
+    //         org.springframework.web.client.ResourceAccessException.class,
+    //         java.net.SocketTimeoutException.class,
+    //         java.io.IOException.class
+    //     },
+    //     exclude = { com.diploma.order_service.exceptions.BusinessException.class },
+    //     maxAttempts = 3, // 1 вызов + 2 повтора = 3 попытки
+    //     backoff = @Backoff(delay = 1000, multiplier = 2.0, maxDelay = 3000)
+    // )
+    
+    @Retry(name = "productServiceRetry", fallbackMethod = "fallback")
+    @CircuitBreaker(name = "productServiceCB", fallbackMethod = "fallback")
     public List<BuyResponse> buyProducts(List<BuyRequest> request) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -72,9 +77,8 @@ public class ProductClient {
         return responseEntity.getBody();
     }
 
-    @Recover
-    public void recover(Exception e, List<BuyRequest> request) {
-        System.out.println("[Fallback] Product purchase failed after retries.");
-        // throw new BusinessException("Product service unavailable. Fallback after retries.", e);
+    public List<BuyResponse> fallback(List<BuyRequest> request, Throwable throwable) {
+        log.error("[Fallback] Triggered due to exception: {}", throwable.toString(), throwable);
+        throw new BusinessException("Product service is unavailable. Fallback triggered.");
     }
 }    
