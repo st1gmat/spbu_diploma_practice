@@ -1,5 +1,7 @@
 package com.diploma.order_service.configs;
 
+import io.github.resilience4j.bulkhead.BulkheadConfig;
+import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -15,8 +17,11 @@ public class Resilience4jConfig {
     @Bean
     public RetryRegistry retryRegistry() {
         RetryConfig retryConfig = RetryConfig.custom()
-            .maxAttempts(3) // 1 вызов + 2 повтора
-            .waitDuration(Duration.ofSeconds(1)) // начальная задержка
+            .maxAttempts(2)
+            .waitDuration(Duration.ofSeconds(1))
+            .intervalFunction(
+                io.github.resilience4j.core.IntervalFunction.ofExponentialBackoff(1000, 2.0, 2000)
+            )
             .retryExceptions(
                 java.io.IOException.class,
                 java.net.SocketTimeoutException.class,
@@ -25,25 +30,40 @@ public class Resilience4jConfig {
             .ignoreExceptions(
                 com.diploma.order_service.exceptions.BusinessException.class
             )
-            .intervalFunction(
-                io.github.resilience4j.core.IntervalFunction.ofExponentialBackoff(1000, 2.0, 3000)
-            )
             .build();
 
-        return RetryRegistry.of(retryConfig);
+        RetryRegistry registry = RetryRegistry.ofDefaults();
+        registry.retry("productServiceRetry", retryConfig);
+        return registry;
     }
 
     @Bean
     public CircuitBreakerRegistry circuitBreakerRegistry() {
-        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
-            .failureRateThreshold(50)
-            .minimumNumberOfCalls(5)
-            .slidingWindowSize(10)
-            .waitDurationInOpenState(Duration.ofSeconds(6)) // <-- вот здесь
+        CircuitBreakerConfig cbConfig = CircuitBreakerConfig.custom()
+            .failureRateThreshold(40)
+            .minimumNumberOfCalls(10)
+            .slidingWindowSize(20)
+            .waitDurationInOpenState(Duration.ofSeconds(6))
             .permittedNumberOfCallsInHalfOpenState(3)
             .automaticTransitionFromOpenToHalfOpenEnabled(true)
             .build();
 
-        return CircuitBreakerRegistry.of(circuitBreakerConfig);
+        CircuitBreakerRegistry registry = CircuitBreakerRegistry.ofDefaults();
+        registry.circuitBreaker("productServiceCB", cbConfig);
+        return registry;
     }
+
+
+    @Bean
+    public BulkheadRegistry bulkheadRegistry() {
+        BulkheadConfig bulkheadConfig = BulkheadConfig.custom()
+            .maxConcurrentCalls(50)
+            .maxWaitDuration(Duration.ZERO)
+            .build();
+
+        BulkheadRegistry registry = BulkheadRegistry.ofDefaults();
+        registry.bulkhead("productServiceBulkhead", bulkheadConfig);
+        return registry;
+    }
+
 }

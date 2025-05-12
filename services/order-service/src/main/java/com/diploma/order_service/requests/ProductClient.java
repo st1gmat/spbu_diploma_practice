@@ -19,6 +19,7 @@ import com.diploma.order_service.exceptions.BusinessException;
 import com.diploma.order_service.models.product.BuyRequest;
 import com.diploma.order_service.models.product.BuyResponse;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,7 @@ public class ProductClient {
     
     @Retry(name = "productServiceRetry", fallbackMethod = "fallback")
     @CircuitBreaker(name = "productServiceCB", fallbackMethod = "fallback")
+    // @Bulkhead(name = "productServiceBulkhead", type = Bulkhead.Type.SEMAPHORE)
     public List<BuyResponse> buyProducts(List<BuyRequest> request) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
