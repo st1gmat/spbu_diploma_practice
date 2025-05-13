@@ -39,37 +39,47 @@ application:
         customer-url: http://${CUSTOMER_SERVICE_HOST:localhost}:${CUST_SERVICE_PORT:8090}/api/v1/customer
         product-url: http://${PRODUCT_SERVICE_HOST:localhost}:${PRODUCT_SERVICE_PORT:8345}/api/v1/product
         payment-url: http://${PAYMENT_SERVICE_HOST:localhost}:${PAYMENT_SERVICE_PORT:9324}/api/v1/payment
+logging:
+  level:
+    io.github.resilience4j.retry: DEBUG
+# resilience4j:
+#   retry:
+#     instances:
+#       productServiceRetry:
+#         max-attempts: 4           # 1 вызов + 3 повтора
+#         wait-duration: 2s         # базовая задержка
+#         interval-function:
+#           type: exponential_backoff
+#           initial-interval: 2000  # 2s
+#           multiplier: 2.0
+#           max-interval: 4000      # максимум 4s между попытками
+#         # max-wait-duration: 10s    # общее время между всеми попытками
+#         retry-exceptions:
+#           - java.io.IOException
+#           - java.net.SocketTimeoutException
+#           - org.springframework.web.reactive.function.client.WebClientRequestException
+#         ignore-exceptions:
+#           - com.diploma.order_service.exceptions.BusinessException
+#         fail-after-max-attempts: true
 
-resilience4j:
-  retry:
-    instances:
-      productServiceRetry:
-        maxAttempts: 3                # 1 основная + 2 повтора
-        waitDuration: 4s             # 1 секунда между попытками
-        retryExceptions:
-          - org.springframework.web.reactive.function.client.WebClientRequestException
-          - java.io.IOException
-        ignoreExceptions:
-          - com.diploma.order_service.exceptions.BusinessException
-        failAfterMaxAttempts: true
 
 
-  circuitbreaker:
-    instances:
-      productServiceCircuitBreaker:
-        slidingWindowType: TIME_BASED
-        slidingWindowSize: 10         # собираем статистику за последние 10 секунд
-        minimumNumberOfCalls: 100      # минимум 100 вызовов для оценки
-        failureRateThreshold: 50       # если >50% неудачные — открыть
-        waitDurationInOpenState: 30s   # 30 секунд ждать перед retry
-        permittedNumberOfCallsInHalfOpenState: 5  # сколько пробных вызовов при переходе в HALF_OPEN
-        automaticTransitionFromOpenToHalfOpenEnabled: true
+#   circuitbreaker:
+#     instances:
+#       productServiceCircuitBreaker:
+#         slidingWindowType: TIME_BASED
+#         slidingWindowSize: 10         # собираем статистику за последние 10 секунд
+#         minimumNumberOfCalls: 100      # минимум 100 вызовов для оценки
+#         failureRateThreshold: 50       # если >50% неудачные — открыть
+#         waitDurationInOpenState: 30s   # 30 секунд ждать перед retry
+#         permittedNumberOfCallsInHalfOpenState: 5  # сколько пробных вызовов при переходе в HALF_OPEN
+#         automaticTransitionFromOpenToHalfOpenEnabled: true
 
-  bulkhead:
-    instances:
-      productServiceBulkhead:
-        maxConcurrentCalls: 50
-        maxWaitDuration: 0
+#   bulkhead:
+#     instances:
+#       productServiceBulkhead:
+#         maxConcurrentCalls: 50
+#         maxWaitDuration: 0
 
 server:
   port: ${ORDER_SERVICE_PORT:8633} 

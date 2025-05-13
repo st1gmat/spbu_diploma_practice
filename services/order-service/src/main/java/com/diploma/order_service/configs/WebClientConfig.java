@@ -44,18 +44,18 @@ public class WebClientConfig {
         ConnectionProvider connectionProvider = ConnectionProvider.builder(poolName)
             .maxConnections(maxConnections)
             .pendingAcquireMaxCount(pendingAcquireMax)
-            .pendingAcquireTimeout(Duration.ofSeconds(20))
+            .pendingAcquireTimeout(Duration.ofSeconds(3)) // необязательно, можно оставить 20
             .maxIdleTime(Duration.ofSeconds(15))
             .maxLifeTime(Duration.ofMinutes(5))
             .evictInBackground(Duration.ofSeconds(30))
             .build();
 
         HttpClient httpClient = HttpClient.create(connectionProvider)
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000)
-            .responseTimeout(Duration.ofSeconds(15))
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000) // таймаут на установление соединения
+            .responseTimeout(Duration.ofSeconds(3))             // общий таймаут ответа (TCP-level)
             .doOnConnected(conn -> conn
-                .addHandlerLast(new ReadTimeoutHandler(15))
-                .addHandlerLast(new WriteTimeoutHandler(15)))
+                .addHandlerLast(new ReadTimeoutHandler(3))      // таймаут на чтение
+                .addHandlerLast(new WriteTimeoutHandler(3)))    // таймаут на запись
             .compress(true);
 
         return WebClient.builder()
@@ -63,4 +63,6 @@ public class WebClientConfig {
             .clientConnector(new ReactorClientHttpConnector(httpClient))
             .build();
     }
+
+
 }
