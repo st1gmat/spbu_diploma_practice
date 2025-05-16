@@ -25,6 +25,15 @@ spring:
   application:
     name: order-service
 
+
+resilience4j:
+  ratelimiter:
+    instances:
+      orderServiceRateLimiter:
+        limit-for-period: 140
+        limit-refresh-period: 1s
+        timeout-duration: 0ms
+        
 management:
   tracing:
     sampling:

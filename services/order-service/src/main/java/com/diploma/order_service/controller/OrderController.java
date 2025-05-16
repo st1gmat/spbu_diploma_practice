@@ -7,6 +7,8 @@ import com.diploma.order_service.models.order.OrderRequest;
 import com.diploma.order_service.models.order.OrderResponse;
 import com.diploma.order_service.services.OrderService;
 
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -26,8 +28,13 @@ public class OrderController {
     private final OrderService service;
 
     @PostMapping
+    @RateLimiter(name = "orderServiceRateLimiter", fallbackMethod = "handleRateLimitExceeded")    
     public ResponseEntity<Integer> createOrder(@RequestBody @Valid OrderRequest request) {
         return ResponseEntity.ok(service.createOrder(request));
+    }
+
+    public ResponseEntity<Integer> handleRateLimitExceeded(@RequestBody @Valid OrderRequest request, RequestNotPermitted ex) {
+        return ResponseEntity.status(429).body(null);
     }
 
     @GetMapping
