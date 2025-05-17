@@ -7,6 +7,7 @@ import com.diploma.order_service.models.order.OrderRequest;
 import com.diploma.order_service.models.order.OrderResponse;
 import com.diploma.order_service.services.OrderService;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +30,8 @@ public class OrderController {
     private final OrderService service;
 
     @PostMapping
-    @RateLimiter(name = "orderServiceRateLimiter", fallbackMethod = "handleRateLimitExceeded")    
+    // @RateLimiter(name = "orderServiceRateLimiter", fallbackMethod = "handleRateLimitExceeded")   
+    @Bulkhead(name = "orderControllerBulkhead", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "fallbackCreateOrder") 
     public ResponseEntity<Integer> createOrder(@RequestBody @Valid OrderRequest request) {
         return ResponseEntity.ok(service.createOrder(request));
     }
@@ -47,6 +50,9 @@ public class OrderController {
         return ResponseEntity.ok(service.findById(orderId));
     }
     
-    
+    public ResponseEntity<Integer> fallbackCreateOrder(OrderRequest request, Throwable t) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .body(null); // или код ошибки
+}
 
 }
