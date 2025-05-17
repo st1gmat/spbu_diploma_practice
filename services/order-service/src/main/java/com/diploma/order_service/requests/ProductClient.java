@@ -3,6 +3,7 @@ package com.diploma.order_service.requests;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +17,7 @@ import com.diploma.order_service.exceptions.BusinessException;
 import com.diploma.order_service.models.product.BuyRequest;
 import com.diploma.order_service.models.product.BuyResponse;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import lombok.RequiredArgsConstructor;
 
 @Service

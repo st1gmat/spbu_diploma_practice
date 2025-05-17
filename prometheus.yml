@@ -17,11 +17,11 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets:
-          - "192.168.10.100:8090" # Customer Service
-          - "192.168.10.100:8257" # Notification Service
-          - "192.168.10.100:8633" # Order Service
-          - "192.168.10.100:9324" # Payment Service
-          - "192.168.10.100:8345" # Product Service
+          - "192.168.10.104:8090" # Customer Service
+          - "192.168.10.104:8257" # Notification Service
+          - "192.168.10.104:8633" # Order Service
+          - "192.168.10.104:9324" # Payment Service
+          - "192.168.10.104:8345" # Product Service
 
   - job_name: "kafka"
     static_configs:
