@@ -3,7 +3,10 @@ package com.diploma.order_service.services;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.diploma.order_service.exceptions.BusinessException;
 import com.diploma.order_service.models.order.Order;
 import com.diploma.order_service.models.order.OrderConfirmation;
@@ -17,6 +20,8 @@ import com.diploma.order_service.requests.CustomerClient;
 import com.diploma.order_service.requests.PaymentClient;
 import com.diploma.order_service.requests.ProductClient;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -94,7 +99,8 @@ public class OrderService {
         //                 });
         // }
 
-
+        @RateLimiter(name = "orderServiceLimiter")
+        @Bulkhead(name = "orderServiceThrottling", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "fallbackCreateOrder")
         public Mono<Integer> createOrder(OrderRequest request) { 
                 return customerClient.findById(request.customerId())
                         .switchIfEmpty(Mono.error(new BusinessException("Customer not found")))
@@ -137,8 +143,14 @@ public class OrderService {
                         });
             }
 
-
-    
+        public Mono<Integer> fallbackCreateOrder(OrderRequest request, Throwable ex) {
+                return Mono.error(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Service overloaded"));
+        }
+//     Flux.fromIterable(request.products())
+//         .onBackpressureBuffer(100,
+//                 p -> log.warn("Dropped BuyRequest due to backpressure: {}", p),
+//                 BufferOverflowStrategy.DROP_OLDEST)
+//         .flatMap(productClient::buyOne, 10) // максимум 10 одновременно
 
     public Mono<OrderResponse> findById(Integer id) {
         return orderRepository.findById(id)

@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
   r2dbc:
     url: r2dbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/order
     username: ${PG_USERNAME:root}
@@ -27,6 +31,42 @@ management:
       exposure:
         include:
         - prometheus
+# resilience4j:
+#   bulkhead:
+#     instances:
+#       # customerServiceBulkhead:
+#       #   max-concurrent-calls: 40         # Запросы к клиентам — быстрые, но часто повторяются
+#       #   max-wait-duration: 50ms          # Быстро отказывать, если всё занято
+
+#       # productServiceBulkhead:
+#       #   max-concurrent-calls: 20         # Тяжёлый вызов, может тормозить цепочку
+#       #   max-wait-duration: 50ms
+
+#       # paymentServiceBulkhead:
+#       #   max-concurrent-calls: 25         # Зависит от скорости платёжного сервиса
+#       #   max-wait-duration: 100ms
+
+#       orderServiceThrottling:
+#         max-concurrent-calls: 100
+#         max-wait-duration: 2000ms
+resilience4j:
+  bulkhead:
+    instances:
+      orderServiceThrottling:
+        max-concurrent-calls: 150           # сколько одновременно запросов обрабатываем
+        max-wait-duration: 2000ms           # ждём максимум 2 секунды — потом 429
+
+  ratelimiter:
+    instances:
+      orderServiceLimiter:
+        limit-for-period: 150               # разрешаем 150 запросов в секунду ( пик)
+        limit-refresh-period: 1s
+        timeout-duration: 0ms      
+    # orderServiceRateLimiter:
+    #   limit-for-period: 150
+    #   limit-refresh-period: 1s
+    #   timeout-duration: 0ms
+    
 
 # URLs for open feign via api gateway
 application:
