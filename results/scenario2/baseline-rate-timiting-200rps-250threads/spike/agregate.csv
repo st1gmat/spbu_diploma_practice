@@ -1,0 +1,3 @@
+Label,# Samples,Average,Median,90% Line,95% Line,99% Line,Min,Max,Error %,Throughput,Received KB/sec,Sent KB/sec
+POST: createOrder,31251,165,60,259,1271,1641,0,3637,"14,064%","89,12687","14,70","40,31"
+TOTAL,31251,165,60,259,1271,1641,0,3637,"14,064%","89,12687","14,70","40,31"
