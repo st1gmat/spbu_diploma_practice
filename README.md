@@ -19,6 +19,12 @@
 
 - [`native_reactive_cb_bh_retry_timeout`](https://github.com/st1gmat/spbu_diploma_practice/tree/native_reactive_cb_bh_retry_timeout) - включает **Circuit Breaker**, **Bulkhead**, **Retry**, **Timeout**. Построена на основе `native_reactive`.
 
+- [`native_rate_limiting`](https://github.com/st1gmat/spbu_diploma_practice/tree/native_rate_limiting) - включает Rate Limiting при базовой реализации
+
+- [`native_sync_rt_bh_cache`](https://github.com/st1gmat/spbu_diploma_practice/tree/native_sync_rt_bh_cache) - включает Throttling + Cache-Aside при базовой реализации
+
+- [`native_reactive_throttling_cache`](https://github.com/st1gmat/spbu_diploma_practice/tree/native_reactive_throttling_cache) - включает Throttling + Cache-Aside при реактивной реализации
+
 <details>
 <summary>Прочее:</summary>
   
@@ -29,8 +35,6 @@
 - [`reactive-order-service`](https://github.com/st1gmat/spbu_diploma_practice/tree/reactive-order-service) - содержит только реактивную реализацию **Order-сервиса** относительно `basic_implementation`
 
 </details>   
-
-
 
 
 ## Используемый стек
